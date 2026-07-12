@@ -24,11 +24,11 @@ public:
 
     void displayDetail()
     {
-
-        cout << "Vehicle ID: " << vehicleId << endl;
-        cout << "Brand: " << Brand << endl;
-        cout << "Model: " << Model << endl;
-        cout << "Price Per Day: Rs. " << pricePerDay << endl;
+        cout << "-----------------------------------------------\n";
+        cout << "Vehicle ID    : " << vehicleId << endl;
+        cout << "Brand         : " << Brand << endl;
+        cout << "Model         : " << Model << endl;
+        cout << "Price Per Day : Rs. " << pricePerDay << endl;
 
         if (Availability)
         {
@@ -38,6 +38,12 @@ public:
         {
             cout << "Status: Rented" << endl;
         }
+        cout << "-----------------------------------------------\n";
+    }
+
+    bool getAvailability()
+    {
+        return Availability;
     }
 
     string getVehicleID()
@@ -80,49 +86,64 @@ public:
 
         return false;
     }
+
+    void markAsRented()
+    {
+        Availability = false;
+    }
+
+    void markAsAvailable()
+    {
+        Availability = true;
+    }
 };
 
 void addVehicle(vector<Vehicle> &vehicles)
 {
+    cout << "\n=================== Add Vehicle =====================\n";
     string id;
-    cout << "\nEnter Vehicle Id : ";
+    cout << "Enter Vehicle Id : ";
     cin >> id;
 
     int f = 1;
-    for (Vehicle vehicle : vehicles)
+    for (Vehicle &vehicle : vehicles)
     {
         if (vehicle.getVehicleID() == id)
         {
             f = 0;
+            break;
         }
     }
     if (f == 0)
     {
-        cout << "Error: Vehicle ID " << id << " already exists.\n";
-        cout << "Vehicle not added.";
+        cout << "\nError: Vehicle ID " << id << " already exists.\n";
+        cout << "Vehicle not added.\n";
+        cout << "==================================================\n";
     }
     else
     {
         string brand;
-        cout << "Enter Brand : ";
+        cout << "Enter Brand         : ";
         cin >> brand;
         string model;
-        cout << "Enter Model : ";
+        cout << "Enter Model         : ";
         cin >> model;
         int price;
         cout << "Enter Price per Day : ";
         cin >> price;
         Vehicle newVehicle(id, brand, model, price);
         vehicles.push_back(newVehicle);
-        cout << "\n----Vehicle Added Sucessfully----";
+        cout << "\n----Vehicle Added Sucessfully----\n";
+        cout << "================================================\n";
     }
 }
 
 void displayVehicle(vector<Vehicle> &vehicles)
 {
+    cout << "\n================= ALL VEHICLES ==================\n";
     if (vehicles.empty())
     {
-        cout << "----No Vehicle Found in System----" << endl;
+        cout << "-------- No Vehicles Found in the System --------\n";
     }
     else
     {
@@ -131,21 +152,23 @@ void displayVehicle(vector<Vehicle> &vehicles)
         {
             vehicle.displayDetail();
         }
+        cout << "==================================================\n";
     }
 }
 
 void searchVehicle(vector<Vehicle> &vehicles)
 {
+    cout << "\n================ SEARCH VEHICLE =================\n";
     string id;
     cout << "Enter Vehicle ID to search : ";
     cin >> id;
     int f = 0;
 
-    for (Vehicle vehicle : vehicles)
+    for (Vehicle& vehicle : vehicles)
     {
         if (vehicle.getVehicleID() == id)
         {
-            cout << "----Vehicle Found----";
+            cout << "\n----Vehicle Found----\n";
             vehicle.displayDetail();
             f = 1;
             break;
@@ -153,12 +176,14 @@ void searchVehicle(vector<Vehicle> &vehicles)
     }
     if (f == 0)
     {
-        cout << "Vehicle with ID " << id << " not found.";
+        cout << "\nVehicle with ID " << id << " not found.\n";
     }
+    cout << "======================================================";
 }
 
 void updateVehicle(vector<Vehicle> &vehicles)
 {
+    cout << "\n================ UPDATE VEHICLE =================\n";
     string id;
     cout << "Enter Vehicle ID to update: ";
     cin >> id;
@@ -168,7 +193,7 @@ void updateVehicle(vector<Vehicle> &vehicles)
         if (vehicle.getVehicleID() == id)
         {
             f = 1;
-            cout << "----Vehicle Found----";
+            cout << "\n----Vehicle Found----\n";
             vehicle.displayDetail();
             cout << endl;
             cout << "1. Update Brand\n";
@@ -188,7 +213,7 @@ void updateVehicle(vector<Vehicle> &vehicles)
 
                 vehicle.setBrand(brand);
 
-                cout << "Brand Updated Successfully!";
+                cout << "\nBrand Updated Successfully!\n";
             }
             else if (ch == 2)
             {
@@ -198,7 +223,7 @@ void updateVehicle(vector<Vehicle> &vehicles)
 
                 vehicle.setModel(model);
 
-                cout << "Model Updated Successfully!";
+                cout << "\nModel Updated Successfully!\n";
             }
             else if (ch == 3)
             {
@@ -208,21 +233,17 @@ void updateVehicle(vector<Vehicle> &vehicles)
 
                 if (vehicle.setPrice(price))
                 {
-                    cout << "Price Updated Successfully!";
+                    cout << "\nPrice Updated Successfully!\n";
                 }
                 else
                 {
-                    cout << "Invalid price! Price must be greater than 0.";
+                    cout << "\nInvalid price! Price must be greater than 0.\n";
                 }
             }
-            else if (ch == 4)
-            {
-                break;
-            }
+
             else
             {
-                cout << "Invalid Choice !!!!";
-                break;
+                cout << "\nUpdate Cancelled or Invalid Choice.\n";
             }
 
             break;
@@ -230,8 +251,91 @@ void updateVehicle(vector<Vehicle> &vehicles)
     }
     if (f == 0)
     {
-        cout << "Vehicle with ID " << id << " not found.";
+        cout << "\nVehicle with ID " << id << " not found.\n";
     }
+    cout << "================================================\n";
+}
+
+void displayAvlbVehicle(vector<Vehicle> &vehicles)
+{
+    cout << "\n=============== Available Vehicle ===============\n";
+    int f = 0;
+    for (Vehicle &vehicle : vehicles)
+    {
+        if (vehicle.getAvailability() == true)
+        {
+            vehicle.displayDetail();
+            f = 1;
+        }
+    }
+    if (f == 0)
+    {
+        cout << "\n!!!!!-- No Vehicle Available --!!!!!\n";
+    }
+    cout << "\n==================================================\n";
+}
+
+void markRented(vector<Vehicle> &vehicles)
+{
+    cout << "\n=============== Mark Vehicle Rented ===============\n";
+    string id;
+    cout << "Enter Vehicle ID to mark rented : ";
+    cin >> id;
+    int f = 0;
+    for (Vehicle &vehicle : vehicles)
+    {
+        if (vehicle.getVehicleID() == id)
+        {
+            f = 1;
+            if (vehicle.getAvailability() == false)
+            {
+                cout << "\n!!!!!  Vehicle " << id << " is already Rented  !!!!!";
+            }
+            else
+            {
+                vehicle.markAsRented();
+                cout << "\n!!!!!  Vehicle " << id << " marked as rented successfully.  !!!!!";
+            }
+            break;
+        }
+    }
+    if (f == 0)
+    {
+        cout << "\n!!!!!  Vehicle with ID " << id << " not found.  !!!!!";
+    }
+    cout << "\n=========================================================\n";
+}
+
+void returnVehicle(vector<Vehicle> &vehicles)
+{
+    cout << "\n=============== Return Rented Vehicle ===============\n";
+    string id;
+    cout << "Enter Vehicle ID to return : ";
+    cin >> id;
+    int f = 0;
+    for (Vehicle &vehicle : vehicles)
+    {
+        if (vehicle.getVehicleID() == id)
+        {
+            f = 1;
+            if (vehicle.getAvailability() == true)
+            {
+                cout << "\n!!!!!  Vehicle " << id << " is already Available.  !!!!!";
+            }
+            else
+            {
+                vehicle.markAsAvailable();
+                cout << "\n!!!!!  Vehicle " << id << " returned successfully.  !!!!!";
+                cout << "\n Status is now Available. \n";
+            }
+            break;
+        }
+    }
+    if (f == 0)
+    {
+        cout << "\n!!!!!  Vehicle with ID " << id << " not found.  !!!!!";
+    }
+    cout << "\n=========================================================\n";
 }
 
 int main()
@@ -240,14 +344,17 @@ int main()
     bool f = true;
     while (f)
     {
-        // cout << endl;
-        cout << endl
-             << "1. Add Vehicle\n";
+        cout << "\n===== VEHICLE RENTAL SYSTEM MENU =====\n";
+        cout << "1. Add Vehicle\n";
         cout << "2. Display All Vehicles\n";
         cout << "3. Search Vehicle\n";
         cout << "4. Update Vehicle\n";
-        cout << "5. Exit\n";
-        cout << "Enter your choice:";
+        cout << "5. Display Available Vehicles\n";
+        cout << "6. Mark Vehicle as Rented\n";
+        cout << "7. Return Vehicle\n";
+        cout << "8. Exit\n";
+        cout << "======================================\n";
+        cout << "Enter your choice: ";
         int choice;
         cin >> choice;
         if (choice == 1)
@@ -268,12 +375,24 @@ int main()
         }
         else if (choice == 5)
         {
-            cout << "Exiting Vehicle Rental System...";
+            displayAvlbVehicle(vehicles);
+        }
+        else if (choice == 6)
+        {
+            markRented(vehicles);
+        }
+        else if (choice == 7)
+        {
+            returnVehicle(vehicles);
+        }
+        else if (choice == 8)
+        {
+            cout << "\nExiting Vehicle Rental System...\n";
             f = false;
         }
         else
         {
-            cout << "Invalid choice! Please try again.";
+            cout << "\nInvalid choice! Please try again.\n";
         }
     }
 
