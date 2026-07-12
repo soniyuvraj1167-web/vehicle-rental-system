@@ -98,6 +98,82 @@ public:
     }
 };
 
+class Customer
+{
+private:
+    string CustomerID;
+    string Name;
+    string Phone;
+    string Email;
+    string Licence;
+
+public:
+    Customer(string customerID, string name, string phone, string email, string licence)
+    {
+        this->CustomerID = customerID;
+        this->Name = name;
+        this->Phone = phone;
+        this->Email = email;
+        this->Licence = licence;
+    }
+
+    void displayDetail()
+    {
+        cout << "-----------------------------------------------\n";
+        cout << "Custome ID    : " << CustomerID << endl;
+        cout << "Name          : " << Name << endl;
+        cout << "Phone Number  : " << Phone << endl;
+        cout << "Email         : " << Email << endl;
+        cout << "Driving Licence  : " << Licence << endl;
+        cout << "-----------------------------------------------\n";
+    }
+
+    void setCustomerName(string name)
+    {
+        this->Name = name;
+    }
+
+    void setPhone(string phone)
+    {
+        this->Phone = phone;
+    }
+
+    void setEmail(string email)
+    {
+        this->Email = email;
+    }
+
+    void setLicence(string licence)
+    {
+        this->Licence = licence;
+    }
+
+    string getCustomerID()
+    {
+        return CustomerID;
+    }
+
+    string getName()
+    {
+        return Name;
+    }
+
+    string getPhone()
+    {
+        return Phone;
+    }
+
+    string getEmail()
+    {
+        return Email;
+    }
+
+    string getLicence()
+    {
+        return Licence;
+    }
+};
+
 void addVehicle(vector<Vehicle> &vehicles)
 {
     cout << "\n=================== Add Vehicle =====================\n";
@@ -164,7 +240,7 @@ void searchVehicle(vector<Vehicle> &vehicles)
     cin >> id;
     int f = 0;
 
-    for (Vehicle& vehicle : vehicles)
+    for (Vehicle &vehicle : vehicles)
     {
         if (vehicle.getVehicleID() == id)
         {
@@ -338,63 +414,184 @@ void returnVehicle(vector<Vehicle> &vehicles)
     cout << "\n=========================================================\n";
 }
 
-int main()
+void registerCustomer(vector<Customer> &customers)
 {
-    vector<Vehicle> vehicles;
-    bool f = true;
-    while (f)
+    cout << "\n=================== Register Customer =====================\n";
+    string id;
+    cout << "Enter Customer Id : ";
+    cin >> id;
+    cin.ignore(1000, '\n');
+    string name;
+    cout << "Enter Full Name         : ";
+    getline(cin, name);
+    string phone;
+    cout << "Enter Phone Number      : ";
+    cin >> phone;
+    string email;
+    cout << "Enter Email             : ";
+    cin >> email;
+    string licence;
+    cout << "Enter Driving Licence   : ";
+    cin >> licence;
+    int f = 1;
+    for (Customer &customer : customers)
     {
-        cout << "\n===== VEHICLE RENTAL SYSTEM MENU =====\n";
-        cout << "1. Add Vehicle\n";
-        cout << "2. Display All Vehicles\n";
-        cout << "3. Search Vehicle\n";
-        cout << "4. Update Vehicle\n";
-        cout << "5. Display Available Vehicles\n";
-        cout << "6. Mark Vehicle as Rented\n";
-        cout << "7. Return Vehicle\n";
-        cout << "8. Exit\n";
-        cout << "======================================\n";
-        cout << "Enter your choice: ";
-        int choice;
-        cin >> choice;
-        if (choice == 1)
+        if (customer.getCustomerID() == id)
         {
-            addVehicle(vehicles);
+            cout << "\nError: Customer ID " << id << " already exists.\n";
+            cout << "Customer not added.\n";
+            f = 0;
+            break;
         }
-        else if (choice == 2)
+        else if (customer.getPhone() == phone)
         {
-            displayVehicle(vehicles);
+            cout << "\nError: Phone " << phone << " already exists.\n";
+            cout << "Customer not added.\n";
+            f = 0;
+            break;
         }
-        else if (choice == 3)
+        else if (customer.getEmail() == email)
         {
-            searchVehicle(vehicles);
+            cout << "\nError: Email " << email << " already exists.\n";
+            cout << "Customer not added.\n";
+            f = 0;
+            break;
         }
-        else if (choice == 4)
+        else if (customer.getLicence() == licence)
         {
-            updateVehicle(vehicles);
+            cout << "\nError: Licence Number " << licence << " already exists.\n";
+            cout << "Customer not added.\n";
+            f = 0;
+            break;
         }
-        else if (choice == 5)
+    }
+    if (f == 1)
+    {
+        Customer newCustomer(id, name, phone, email, licence);
+        customers.push_back(newCustomer);
+        cout << "\n----Customer Added Sucessfully----\n";
+        cout << "================================================\n";
+    }
+
+}
+
+
+    void displayAllCustomer(vector<Customer> & customers)
+    {
+        cout << "\n================= ALL CUSTOMERS ==================\n";
+        if (customers.empty())
         {
-            displayAvlbVehicle(vehicles);
-        }
-        else if (choice == 6)
-        {
-            markRented(vehicles);
-        }
-        else if (choice == 7)
-        {
-            returnVehicle(vehicles);
-        }
-        else if (choice == 8)
-        {
-            cout << "\nExiting Vehicle Rental System...\n";
-            f = false;
+            cout << "-------- No Customer Found in the System --------\n";
         }
         else
         {
-            cout << "\nInvalid choice! Please try again.\n";
+            for (Customer &customer : customers)
+            {
+                customer.displayDetail();
+            }
+            cout << "==================================================\n";
         }
     }
 
-    return 0;
-}
+    void searchCustomer(vector<Customer> & customers)
+    {
+        cout << "\n================ SEARCH CUSTOMER =================\n";
+        string id;
+        cout << "Enter Customer ID to search : ";
+        cin >> id;
+        int f = 0;
+
+        for (Customer &customer : customers)
+        {
+            if (customer.getCustomerID() == id)
+            {
+                cout << "\n----Customer Found----\n";
+                customer.displayDetail();
+                f = 1;
+                break;
+            }
+        }
+        if (f == 0)
+        {
+            cout << "\nCustomer with ID " << id << " not found.\n";
+        }
+        cout << "======================================================";
+    }
+
+    int main()
+    {
+        vector<Vehicle> vehicles;
+        vector<Customer> customers;
+
+        bool f = true;
+        while (f)
+        {
+            cout << "\n===== VEHICLE RENTAL SYSTEM MENU =====\n";
+            cout << "1. Add Vehicle\n";
+            cout << "2. Display All Vehicles\n";
+            cout << "3. Search Vehicle\n";
+            cout << "4. Update Vehicle\n";
+            cout << "5. Display Available Vehicles\n";
+            cout << "6. Mark Vehicle as Rented\n";
+            cout << "7. Return Vehicle\n";
+            cout << "8. Register Customer\n";
+            cout << "9. Display All Customer\n";
+            cout << "10. Search Customer\n";
+            cout << "11. Exit\n";
+            cout << "======================================\n";
+            cout << "Enter your choice: ";
+            int choice;
+            cin >> choice;
+            if (choice == 1)
+            {
+                addVehicle(vehicles);
+            }
+            else if (choice == 2)
+            {
+                displayVehicle(vehicles);
+            }
+            else if (choice == 3)
+            {
+                searchVehicle(vehicles);
+            }
+            else if (choice == 4)
+            {
+                updateVehicle(vehicles);
+            }
+            else if (choice == 5)
+            {
+                displayAvlbVehicle(vehicles);
+            }
+            else if (choice == 6)
+            {
+                markRented(vehicles);
+            }
+            else if (choice == 7)
+            {
+                returnVehicle(vehicles);
+            }
+            else if (choice == 8)
+            {
+                registerCustomer(customers);
+            }
+            else if (choice == 9)
+            {
+                displayAllCustomer(customers);
+            }
+            else if (choice == 10)
+            {
+                searchCustomer(customers);
+            }
+            else if (choice == 11)
+            {
+                cout << "\nExiting Vehicle Rental System...\n";
+                f = false;
+            }
+            else
+            {
+                cout << "\nInvalid choice! Please try again.\n";
+            }
+        }
+
+        return 0;
+    }
