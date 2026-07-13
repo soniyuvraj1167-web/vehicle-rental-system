@@ -238,6 +238,10 @@ public:
     {
         return vehicleID;
     }
+
+    string getCustomerID(){
+        return customerID;
+    }
 };
 
 void addVehicle(vector<Vehicle> &vehicles)
@@ -468,7 +472,7 @@ void returnVehicle(vector<Vehicle> &vehicles, vector<Rental> &rentals)
                 {
                     if (rental.getVehicleID() == vehicle.getVehicleID())
                     {
-                        flag = true; 
+                        flag = true;
                         vehicle.markAsAvailable();
                         rental.setStatusComplete();
                         cout << "Vehicle " << vehicle.getVehicleID() << " returned successfully." << endl;
@@ -757,6 +761,95 @@ void searchRental(vector<Rental> &rentals)
     cout << "======================================================";
 }
 
+void displayActiveRental(vector<Rental>& rentals){
+    cout << "\n================ Active Rentals =================\n";
+    bool found = false;
+    for(Rental &rental : rentals){
+        if(rental.getStatus() == true){
+            rental.displayDetail();
+            found = true;
+        }
+    }
+    if(!found){
+        cout << "No active rentals found." << endl; 
+    }
+    cout << "==================================================\n";
+}
+
+void displayCompleteRental(vector<Rental>& rentals){
+    cout << "\n================ Complete Rentals =================\n";
+    bool found = false;
+    for(Rental &rental : rentals){
+        if(rental.getStatus() == false){
+            rental.displayDetail();
+            found = true;
+        }
+    }
+    if(!found){
+        cout << "No Complete rentals found." << endl; 
+    }
+    cout << "==================================================\n";
+}
+
+void customerRentalHistory(vector<Rental> &rentals,vector<Customer> &customers){
+    string id;
+    cout << "Enter Customer ID : ";
+    cin >> id;
+    bool found = false;
+    cout << "\n================ RENTAL HISTORY FOR CUSTOMER " << id << " =================\n";
+    for(Customer &customer:customers){
+        if(customer.getCustomerID() == id){
+            found = true;
+            break;
+        }
+    }
+    if(!found){
+        cout << "Customer " << id << " does not exists at all." << endl;
+        return;
+    }
+    found = false;
+    for(Rental &rental:rentals){
+        if(rental.getCustomerID() == id){
+            rental.displayDetail();
+            found = true;
+        }
+    }
+    if(!found){
+        cout << "Customer " << id << " exists but has never rented a vehicle." << endl;
+    }
+    cout << "====================================================================\n";
+}
+
+void vehicleRentalHistory(vector<Rental> &rentals,vector<Vehicle> &vehicles){
+    string id;
+    cout << "Enter Vehicle ID : ";
+    cin >> id;
+    bool found = false;
+    cout << "\n================ RENTAL HISTORY FOR VEHICLE " << id << " =================\n";
+    for(Vehicle &vehicle:vehicles){
+        if(vehicle.getVehicleID() == id){
+            found = true;
+            break;
+        }
+    }
+    if(!found){
+        cout << id << " → Vehicle doesn't exist" << endl;
+        return;
+    }
+    found = false;
+    for(Rental &rental:rentals){
+        if(rental.getVehicleID() == id){
+            rental.displayDetail();
+            found = true;
+        }
+    }
+    if(!found){
+        cout << id << " → Vehicle exists but has never been rented" << endl;
+    }
+    cout << "====================================================================\n";
+
+}
+
 int main()
 {
     vector<Vehicle> vehicles;
@@ -772,7 +865,6 @@ int main()
         cout << "3. Search Vehicle\n";
         cout << "4. Update Vehicle\n";
         cout << "5. Display Available Vehicles\n";
-        // cout << "6. Mark Vehicle as Rented\n";
         cout << "6. Return Vehicle\n";
         cout << "7. Register Customer\n";
         cout << "8. Display All Customer\n";
@@ -780,7 +872,11 @@ int main()
         cout << "10. Rent Vehicle\n";
         cout << "11. Display All Rental\n";
         cout << "12. Search Rental\n";
-        cout << "13. Exit\n";
+        cout << "13. Display Active Rentals\n";
+        cout << "14. Display Completed Rentals\n";
+        cout << "15. Customer Rental History\n";
+        cout << "16. Vehicle Rental History\n";
+        cout << "17. Exit\n";
         cout << "======================================\n";
         cout << "Enter your choice: ";
         int choice;
@@ -807,7 +903,7 @@ int main()
         }
         else if (choice == 6)
         {
-            returnVehicle(vehicles,rentals);
+            returnVehicle(vehicles, rentals);
         }
         else if (choice == 7)
         {
@@ -834,6 +930,22 @@ int main()
             searchRental(rentals);
         }
         else if (choice == 13)
+        {
+            displayActiveRental(rentals);
+        }
+        else if (choice == 14)
+        {
+            displayCompleteRental(rentals);
+        }
+        else if (choice == 15)
+        {
+            customerRentalHistory(rentals,customers);
+        }
+        else if (choice == 16)
+        {
+            vehicleRentalHistory(rentals,vehicles);
+        }
+        else if (choice == 17)
         {
             cout << "\nExiting Vehicle Rental System...\n";
             f = false;
