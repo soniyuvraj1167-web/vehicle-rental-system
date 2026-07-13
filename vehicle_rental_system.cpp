@@ -228,6 +228,16 @@ public:
     {
         status = false;
     }
+
+    bool getStatus()
+    {
+        return status;
+    }
+
+    string getVehicleID()
+    {
+        return vehicleID;
+    }
 };
 
 void addVehicle(vector<Vehicle> &vehicles)
@@ -438,34 +448,52 @@ void markRented(vector<Vehicle> &vehicles)
     cout << "\n=========================================================\n";
 }
 
-void returnVehicle(vector<Vehicle> &vehicles)
+void returnVehicle(vector<Vehicle> &vehicles, vector<Rental> &rentals)
 {
     cout << "\n=============== Return Rented Vehicle ===============\n";
     string id;
-    cout << "Enter Vehicle ID to return : ";
+    cout << "Enter Rental ID to complete : ";
     cin >> id;
-    int f = 0;
-    for (Vehicle &vehicle : vehicles)
+    int found = false;
+    for (Rental &rental : rentals)
     {
-        if (vehicle.getVehicleID() == id)
+        if (rental.getRentalID() == id)
         {
-            f = 1;
-            if (vehicle.getAvailability() == true)
+            found = true;
+            if (rental.getStatus() == true)
             {
-                cout << "\n!!!!!  Vehicle " << id << " is already Available.  !!!!!";
+                bool flag = false;
+                string v = rental.getVehicleID();
+                for (Vehicle &vehicle : vehicles)
+                {
+                    if (rental.getVehicleID() == vehicle.getVehicleID())
+                    {
+                        flag = true; 
+                        vehicle.markAsAvailable();
+                        rental.setStatusComplete();
+                        cout << "Vehicle " << vehicle.getVehicleID() << " returned successfully." << endl;
+                        cout << "Rental " << rental.getRentalID() << " marked as Completed." << endl;
+                        cout << "Vehicle status is now Available." << endl;
+                        break;
+                    }
+                }
+                if (flag == false)
+                {
+                    cout << "Associated vehicle " << v << " not found." << endl;
+                    cout << " Return failed." << endl;
+                }
             }
             else
             {
-                vehicle.markAsAvailable();
-                cout << "\n!!!!!  Vehicle " << id << " returned successfully.  !!!!!";
-                cout << "\n Status is now Available. \n";
+                cout << "Rental " << id << " is already completed." << endl;
+                cout << "Return failed." << endl;
             }
             break;
         }
     }
-    if (f == 0)
+    if (found == false)
     {
-        cout << "\n!!!!!  Vehicle with ID " << id << " not found.  !!!!!";
+        cout << "\n!!!!!  Rental with ID " << id << " not found.  !!!!!";
     }
     cout << "\n=========================================================\n";
 }
@@ -744,15 +772,15 @@ int main()
         cout << "3. Search Vehicle\n";
         cout << "4. Update Vehicle\n";
         cout << "5. Display Available Vehicles\n";
-        cout << "6. Mark Vehicle as Rented\n";
-        cout << "7. Return Vehicle\n";
-        cout << "8. Register Customer\n";
-        cout << "9. Display All Customer\n";
-        cout << "10. Search Customer\n";
-        cout << "11. Rent Vehicle\n";
-        cout << "12. Display All Rental\n";
-        cout << "13. Search Rental\n";
-        cout << "14. Exit\n";
+        // cout << "6. Mark Vehicle as Rented\n";
+        cout << "6. Return Vehicle\n";
+        cout << "7. Register Customer\n";
+        cout << "8. Display All Customer\n";
+        cout << "9. Search Customer\n";
+        cout << "10. Rent Vehicle\n";
+        cout << "11. Display All Rental\n";
+        cout << "12. Search Rental\n";
+        cout << "13. Exit\n";
         cout << "======================================\n";
         cout << "Enter your choice: ";
         int choice;
@@ -779,37 +807,33 @@ int main()
         }
         else if (choice == 6)
         {
-            markRented(vehicles);
+            returnVehicle(vehicles,rentals);
         }
         else if (choice == 7)
         {
-            returnVehicle(vehicles);
+            registerCustomer(customers);
         }
         else if (choice == 8)
         {
-            registerCustomer(customers);
+            displayAllCustomer(customers);
         }
         else if (choice == 9)
         {
-            displayAllCustomer(customers);
+            searchCustomer(customers);
         }
         else if (choice == 10)
         {
-            searchCustomer(customers);
+            rentVehicle(vehicles, customers, rentals);
         }
         else if (choice == 11)
         {
-            rentVehicle(vehicles, customers, rentals);
+            displayAllRental(rentals);
         }
         else if (choice == 12)
         {
-            displayAllRental(rentals);
-        }
-        else if (choice == 13)
-        {
             searchRental(rentals);
         }
-        else if (choice == 14)
+        else if (choice == 13)
         {
             cout << "\nExiting Vehicle Rental System...\n";
             f = false;
