@@ -2,7 +2,131 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <ctime>
+#include <iomanip>
 using namespace std;
+
+class Date
+{
+private:
+    int date;
+    int month;
+    int year;
+
+public:
+    Date()
+    {
+        date = 0;
+        month = 0;
+        year = 0;
+    }
+
+    Date(int d, int m, int y)
+    {
+        date = d;
+        month = m;
+        year = y;
+    }
+
+    static Date getCurrentDate()
+    {
+        time_t now = time(0);
+        tm *currentDate = localtime(&now);
+
+        int currentDay = currentDate->tm_mday;
+        int currentMon = currentDate->tm_mon + 1;
+        int currentYear = currentDate->tm_year + 1900;
+
+        return Date(currentDay, currentMon, currentYear);
+    }
+
+    static Date getExpectedDate(int rentalDays)
+    {
+        time_t now = time(0);
+        now += (86400 * rentalDays);
+
+        tm *currentDate = localtime(&now);
+
+        int currentDay = currentDate->tm_mday;
+        int currentMon = currentDate->tm_mon + 1;
+        int currentYear = currentDate->tm_year + 1900;
+
+        return Date(currentDay, currentMon, currentYear);
+
+        // this method is using mktime() to
+
+        // // Get current time
+        // time_t now = time(0);
+
+        // // Convert to local date/time
+        // tm *currentDate = localtime(&now);
+
+        // // Make a copy (don't modify the pointer returned by localtime)
+        // tm expectedDate = *currentDate;
+
+        // // Add rental days
+        // expectedDate.tm_mday += rentalDays;
+
+        // // Normalize the date
+        // mktime(&expectedDate);
+
+        // // Return Date object
+        // return Date(
+        //     expectedDate.tm_mday,
+        //     expectedDate.tm_mon + 1,
+        //     expectedDate.tm_year + 1900);
+    }
+
+    static int getDifference(Date rentalDate, Date actualDate)
+    {
+        tm r = {};
+        tm a = {};
+
+        r.tm_mday = rentalDate.getDate();
+        r.tm_mon = rentalDate.getMonth() - 1;
+        r.tm_year = rentalDate.getYear() - 1900;
+
+        a.tm_mday = actualDate.getDate();
+        a.tm_mon = actualDate.getMonth() - 1;
+        a.tm_year = actualDate.getYear() - 1900;
+
+        time_t strtTm = mktime(&r);
+        time_t endTm = mktime(&a);
+
+        double second = difftime(endTm, strtTm);
+
+        int lateday = second / (60 * 60 * 24);
+
+        if (lateday < 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return lateday;
+        }
+    }
+
+    int getDate()
+    {
+        return date;
+    }
+
+    int getMonth()
+    {
+        return month;
+    }
+
+    int getYear()
+    {
+        return year;
+    }
+
+    void displayDate()
+    {
+        cout << setfill('0') << setw(2) << date << '-' << setw(2) << month << '-' << year << setfill(' ');
+    }
+};
 
 class Vehicle
 {
@@ -185,34 +309,66 @@ private:
     int totalAmount;
     bool status;
 
+    Date rentalDate;
+    Date expectedReturnDate;
+    Date actualDate;
+
+    int pricePerDay;
+    int lateDays;
+    int totalLateCharge;
+
 public:
-    Rental(string rentalID, string customerID, string vehicleID, int days, int totalAmount)
+    Rental(string rentalID, string customerID, string vehicleID, int days, int pricePerDay, int totalAmount, Date rentalDate, Date expectedReturnDate, Date ActualReturnDate)
     {
         this->rentalID = rentalID;
         this->customerID = customerID;
         this->vehicleID = vehicleID;
         this->days = days;
+        this->pricePerDay = pricePerDay;
         this->totalAmount = totalAmount;
+        this->rentalDate = rentalDate;
+        this->expectedReturnDate = expectedReturnDate;
+        this->actualDate = ActualReturnDate;
+        this->lateDays = 0;
+        this->totalLateCharge = 0;
         this->status = true;
     }
 
     void displayDetail()
     {
-        cout << "------------------------------------------------------" << endl;
-        cout << "Rental ID : " << rentalID << endl;
-        cout << "Customer ID : " << customerID << endl;
-        cout << "Vehicle ID : " << vehicleID << endl;
-        cout << "Rental Days : " << days << endl;
-        cout << "Total Amount : " << totalAmount << endl;
-        if (status)
-        {
-            cout << "Status : Active" << endl;
-        }
+        cout << "------------------------------------------------------\n";
+        cout << "Rental ID            : " << rentalID << endl;
+        cout << "Customer ID          : " << customerID << endl;
+        cout << "Vehicle ID           : " << vehicleID << endl;
+        cout << "Rental Days          : " << days << endl;
+        cout << "Price Per Day        : Rs. " << pricePerDay << endl;
+        cout << "Total Amount         : Rs. " << totalAmount << endl;
+
+        cout << "Rental Date          : ";
+        rentalDate.displayDate();
+        cout << endl;
+
+        cout << "Expected Return Date : ";
+        expectedReturnDate.displayDate();
+        cout << endl;
+
+        cout << "Actual Return Date   : ";
+        if (actualDate.getDate() == 0)
+            cout << "Not Returned Yet";
         else
-        {
-            cout << "Status : Completed" << endl;
-        }
-        cout << "------------------------------------------------------" << endl;
+            actualDate.displayDate();
+        cout << endl;
+
+        cout << "Late Days            : " << lateDays << endl;
+        cout << "Late Charge          : Rs. " << totalLateCharge << endl;
+
+        cout << "Status               : ";
+        if (status)
+            cout << "Active";
+        else
+            cout << "Completed";
+
+        cout << "\n------------------------------------------------------\n";
     }
 
     string getRentalID()
@@ -253,6 +409,51 @@ public:
     int getTotalAmount()
     {
         return totalAmount;
+    }
+
+    Date getExpectedReturnDate()
+    {
+        return expectedReturnDate;
+    }
+
+    void setlateDays(int d)
+    {
+        this->lateDays = d;
+    }
+
+    void setTotalLateCharge(int charges)
+    {
+        this->totalLateCharge = charges;
+    }
+
+    void setActualReturnDate(Date curntDate)
+    {
+        this->actualDate = curntDate;
+    }
+
+    Date getRentalDate()
+    {
+        return rentalDate;
+    }
+
+    int getPrice()
+    {
+        return pricePerDay;
+    }
+
+    Date getActualReturnDate()
+    {
+        return actualDate;
+    }
+
+    int getLatedays()
+    {
+        return lateDays;
+    }
+
+    int getLateCharge()
+    {
+        return totalLateCharge;
     }
 };
 
@@ -371,7 +572,23 @@ void saveRental(vector<Rental> &rentals)
         out << rental.getCustomerID() << '|';
         out << rental.getVehicleID() << '|';
         out << rental.getdays() << '|';
+        out << rental.getPrice() << '|';
         out << rental.getTotalAmount() << '|';
+        Date d = rental.getRentalDate();
+        out << d.getDate() << '|';
+        out << d.getMonth() << '|';
+        out << d.getYear() << '|';
+        Date d1 = rental.getExpectedReturnDate();
+        out << d1.getDate() << '|';
+        out << d1.getMonth() << '|';
+        out << d1.getYear() << '|';
+        Date d2 = rental.getActualReturnDate();
+        out << d2.getDate() << '|';
+        out << d2.getMonth() << '|';
+        out << d2.getYear() << '|';
+
+        out << rental.getLatedays() << '|';
+        out << rental.getLateCharge() << '|';
         out << rental.getStatus() << endl;
     }
     out.close();
@@ -388,7 +605,19 @@ void loadRental(vector<Rental> &rentals)
     string Cid;
     string Vid;
     string daysStr;
+    string pricePerDayStr;
     string totalAmountStr;
+    string rentalDayStr;
+    string rentalMonthStr;
+    string rentalYearStr;
+    string expectedDayStr;
+    string expectedMonthStr;
+    string expectedYearStr;
+    string actualDayStr;
+    string actualMonthStr;
+    string actualYearStr;
+    string LateDaysStr;
+    string LateChargeStr;
     string statusStr;
 
     while (getline(in, Rid, '|'))
@@ -396,14 +625,40 @@ void loadRental(vector<Rental> &rentals)
         getline(in, Cid, '|');
         getline(in, Vid, '|');
         getline(in, daysStr, '|');
+        getline(in, pricePerDayStr, '|');
         getline(in, totalAmountStr, '|');
+        getline(in, rentalDayStr, '|');
+        getline(in, rentalMonthStr, '|');
+        getline(in, rentalYearStr, '|');
+        getline(in, expectedDayStr, '|');
+        getline(in, expectedMonthStr, '|');
+        getline(in, expectedYearStr, '|');
+        getline(in, actualDayStr, '|');
+        getline(in, actualMonthStr, '|');
+        getline(in, actualYearStr, '|');
+        getline(in, LateDaysStr, '|');
+        getline(in, LateChargeStr, '|');
         getline(in, statusStr);
 
         int days = stoi(daysStr);
+        int pricePerDay = stoi(pricePerDayStr);
         int totalAmount = stoi(totalAmountStr);
+        int rentalDay = stoi(rentalDayStr);
+        int rentalMonth = stoi(rentalMonthStr);
+        int rentalYear = stoi(rentalYearStr);
+        int expectedDay = stoi(expectedDayStr);
+        int expectedMonth = stoi(expectedMonthStr);
+        int expectedYear = stoi(expectedYearStr);
+        int actualDay = stoi(actualDayStr);
+        int actualMonth = stoi(actualMonthStr);
+        int actualYear = stoi(actualYearStr);
+        int latedays = stoi(LateDaysStr);
+        int latecharge = stoi(LateChargeStr);
         bool status = stoi(statusStr);
 
-        Rental newRental(Rid, Cid, Vid, days, totalAmount);
+        Rental newRental(Rid, Cid, Vid, days, pricePerDay, totalAmount, Date(rentalDay, rentalMonth, rentalYear), Date(expectedDay, expectedMonth, expectedYear), Date(actualDay, actualMonth, actualYear));
+        newRental.setlateDays(latedays);
+        newRental.setTotalLateCharge(latecharge);
         if (status)
         {
             newRental.setStatusActive();
@@ -624,13 +879,43 @@ void returnVehicle(vector<Vehicle> &vehicles, vector<Rental> &rentals)
                     if (rental.getVehicleID() == vehicle.getVehicleID())
                     {
                         flag = true;
+                        Date currentDate = Date::getCurrentDate();
+                        int latedays = Date::getDifference(rental.getExpectedReturnDate(), currentDate);
                         vehicle.markAsAvailable();
                         saveVehicles(vehicles);
                         rental.setStatusComplete();
+                        cout << "\n=============== Return Summary ===============\n";
+                        cout << "Rental ID : " << rental.getRentalID() << endl;
+                        cout << "Customer ID : " << rental.getCustomerID() << endl;
+                        cout << "Vehicle ID : " << rental.getVehicleID() << endl;
+                        cout << endl;
+                        cout << "Rental Date : ";
+                        rental.getRentalDate().displayDate();
+                        cout << endl;
+                        cout << "Expected Return Date : ";
+                        rental.getExpectedReturnDate().displayDate();
+                        cout << endl;
+                        cout << "Actual Return Date : ";
+                        currentDate.displayDate();
+                        cout << endl;
+                        cout << endl;
+                        if (latedays == 0)
+                        {
+                            cout << "Late Days : 0" << endl;
+                            cout << "Late Charge : 0" << endl;
+                            cout << "Status : Completed" << endl;
+                        }
+                        else
+                        {
+                            rental.setlateDays(latedays);
+                            int lateCharge = latedays * (rental.getPrice() + 200);
+                            rental.setTotalLateCharge(lateCharge);
+                            cout << "Late Days : " << latedays << endl;
+                            cout << "Late Charge : " << lateCharge << endl;
+                            cout << "Status : Completed" << endl;
+                        }
+                        rental.setActualReturnDate(currentDate);
                         saveRental(rentals);
-                        cout << "Vehicle " << vehicle.getVehicleID() << " returned successfully." << endl;
-                        cout << "Rental " << rental.getRentalID() << " marked as Completed." << endl;
-                        cout << "Vehicle status is now Available." << endl;
                         // saveVehicles(vehicles);
                         break;
                     }
@@ -765,16 +1050,18 @@ void rentVehicle(vector<Vehicle> &vehicles, vector<Customer> &customers, vector<
     string Cid, Vid, Rid;
     cout << "Enter Rental ID : ";
     cin >> Rid;
-    int f = 0;
+
+    Rental *selectedRental = nullptr;
     for (Rental &rental : rentals)
     {
         if (rental.getRentalID() == Rid)
         {
-            f = 1;
+            selectedRental = &rental;
             break;
         }
     }
-    if (f == 1)
+
+    if (selectedRental != nullptr)
     {
         cout << "Error: Rental ID " << Rid << " already exists.\n";
         cout << "Rental failed.";
@@ -784,55 +1071,54 @@ void rentVehicle(vector<Vehicle> &vehicles, vector<Customer> &customers, vector<
 
     cout << "Enter Customer ID : ";
     cin >> Cid;
-    f = 0;
+
+    Customer *selectedCustomer = nullptr;
     for (Customer &customer : customers)
     {
         if (customer.getCustomerID() == Cid)
         {
-            f = 1;
+            selectedCustomer = &customer;
             break;
         }
     }
-    if (f == 0)
+
+    if (selectedCustomer == nullptr)
     {
         cout << "Customer with ID " << Cid << " not found.\n";
         cout << "Rental failed.";
         cout << "\n=======================================================\n";
         return;
     }
-    f = 0;
+
     cout << "Enter Vehicle ID : ";
     cin >> Vid;
+
+    Vehicle *selectedVehicle = nullptr;
     for (Vehicle &vehicle : vehicles)
     {
         if (vehicle.getVehicleID() == Vid)
         {
-            f = 1;
+            selectedVehicle = &vehicle;
             break;
         }
     }
-    for (Vehicle &vehicle : vehicles)
-    {
-        if (vehicle.getAvailability() == false && vehicle.getVehicleID() == Vid)
-        {
-            f = 2;
-            break;
-        }
-    }
-    if (f == 0)
+
+    if (selectedVehicle == nullptr)
     {
         cout << "Vehicle with ID " << Vid << " not found.\n";
         cout << "Rental failed.";
         cout << "\n=======================================================\n";
         return;
     }
-    if (f == 2)
+
+    if (!selectedVehicle->getAvailability())
     {
         cout << "Vehicle with ID " << Vid << " is currently unavailable.\n";
         cout << "Rental failed.";
         cout << "\n=======================================================\n";
         return;
     }
+
     int days;
     cout << "Enter number of rental days : ";
     cin >> days;
@@ -844,34 +1130,34 @@ void rentVehicle(vector<Vehicle> &vehicles, vector<Customer> &customers, vector<
         return;
     }
 
-    for (Customer &customer : customers)
-    {
-        if (customer.getCustomerID() == Cid)
-        {
-            cout << "Customer ID    : " << Cid << endl;
-            cout << "Customer Name  : " << customer.getName() << endl;
-        }
-    }
-    int totalAmount;
-    for (Vehicle &vehicle : vehicles)
-    {
-        if (vehicle.getVehicleID() == Vid)
-        {
-            cout << "Vehicle ID     : " << Vid << endl;
-            cout << "Brand          : " << vehicle.getBrand() << endl;
-            cout << "Model          : " << vehicle.getModel() << endl;
-            cout << "Price per Day  : Rs. " << vehicle.getprice() << endl;
-            cout << "Rental Days    : " << days << endl;
-            totalAmount = days * (vehicle.getprice());
-            cout << "Total Amount   : Rs. " << days * (vehicle.getprice()) << endl;
-            cout << "Rental Status  : Active" << endl;
-            cout << "\nVehicle rented successfully!" << endl;
-            vehicle.markAsRented();
-            break;
-        }
-    }
+    Date currentDate = Date::getCurrentDate();
+    Date expectedReturnDate = Date::getExpectedDate(days);
+    cout << "----------------RENTAL SUMMARY-------------------" << endl;
 
-    Rental newRental(Rid, Cid, Vid, days, totalAmount);
+    cout << "Customer ID    : " << selectedCustomer->getCustomerID() << endl;
+    cout << "Customer Name  : " << selectedCustomer->getName() << endl;
+
+    int totalAmount = 0;
+
+    cout << "Vehicle ID     : " << Vid << endl;
+    cout << "Brand          : " << selectedVehicle->getBrand() << endl;
+    cout << "Model          : " << selectedVehicle->getModel() << endl;
+    cout << "Price per Day  : Rs. " << selectedVehicle->getprice() << endl;
+    cout << "Rental Days    : " << days << endl;
+    cout << "Rental Date    : ";
+    currentDate.displayDate();
+    cout << endl;
+    cout << "Expected Retrun Date : ";
+    expectedReturnDate.displayDate();
+    cout << endl;
+    totalAmount = days * selectedVehicle->getprice();
+    cout << "Total Amount   : Rs. " << days * (selectedVehicle->getprice()) << endl;
+    cout << "Rental Status  : Active" << endl;
+    selectedVehicle->markAsRented();
+    cout << "\nVehicle rented successfully!" << endl;
+
+    cout << "-------------------------------------------------------\n";
+    Rental newRental(Rid, Cid, Vid, days, selectedVehicle->getprice(), totalAmount, currentDate, expectedReturnDate, Date());
     rentals.push_back(newRental);
     saveVehicles(vehicles);
     saveRental(rentals);
@@ -1137,6 +1423,9 @@ int main()
             cout << "\nInvalid choice! Please try again.\n";
         }
     }
+
+    Date today = Date::getCurrentDate();
+    today.displayDate();
 
     return 0;
 }
