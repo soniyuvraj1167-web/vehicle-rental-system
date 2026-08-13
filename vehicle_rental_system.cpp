@@ -947,6 +947,17 @@ void registerCustomer(vector<Customer> &customers)
     string id;
     cout << "Enter Customer Id : ";
     cin >> id;
+    for (Customer &customer : customers)
+    {
+        if (customer.getCustomerID() == id)
+        {
+            cout << "\nError: Customer ID " << id << " already exists.\n";
+            cout << "Customer not added.\n";
+            return;
+        }
+    }
+    
+
     cin.ignore(1000, '\n');
     string name;
     cout << "Enter Full Name         : ";
@@ -954,51 +965,45 @@ void registerCustomer(vector<Customer> &customers)
     string phone;
     cout << "Enter Phone Number      : ";
     cin >> phone;
-    string email;
-    cout << "Enter Email             : ";
-    cin >> email;
-    string licence;
-    cout << "Enter Driving Licence   : ";
-    cin >> licence;
-    int f = 1;
     for (Customer &customer : customers)
     {
-        if (customer.getCustomerID() == id)
-        {
-            cout << "\nError: Customer ID " << id << " already exists.\n";
-            cout << "Customer not added.\n";
-            f = 0;
-            break;
-        }
-        else if (customer.getPhone() == phone)
+        if (customer.getPhone() == phone)
         {
             cout << "\nError: Phone " << phone << " already exists.\n";
             cout << "Customer not added.\n";
-            f = 0;
-            break;
+            return;
         }
-        else if (customer.getEmail() == email)
+    }
+    string email;
+    cout << "Enter Email             : ";
+    cin >> email;
+    for (Customer &customer : customers)
+    {
+        if (customer.getEmail() == email)
         {
             cout << "\nError: Email " << email << " already exists.\n";
             cout << "Customer not added.\n";
-            f = 0;
-            break;
+            return;
         }
-        else if (customer.getLicence() == licence)
+    }
+    string licence;
+    cout << "Enter Driving Licence   : ";
+    cin >> licence;
+    for (Customer &customer : customers)
+    {
+        if (customer.getLicence() == licence)
         {
             cout << "\nError: Licence Number " << licence << " already exists.\n";
             cout << "Customer not added.\n";
-            f = 0;
-            break;
+            return;
         }
     }
-    if (f == 1)
-    {
-        Customer newCustomer(id, name, phone, email, licence);
-        customers.push_back(newCustomer);
-        saveCustomer(customers);
-        cout << "\n----Customer Added Sucessfully----\n";
-    }
+
+    Customer newCustomer(id, name, phone, email, licence);
+    customers.push_back(newCustomer);
+    saveCustomer(customers);
+    cout << "\n----Customer Added Sucessfully----\n";
+
     cout << "================================================\n";
 }
 
@@ -1314,6 +1319,185 @@ void vehicleRentalHistory(vector<Rental> &rentals, vector<Vehicle> &vehicles)
     cout << "====================================================================\n";
 }
 
+void dashboard(vector<Vehicle> &vehicles, vector<Rental> &rentals, vector<Customer> &customers)
+{
+    cout << "\n========== VEHICLE RENTAL DASHBOARD ==========\n";
+
+    int totalVehicle = 0;
+    int availableVehicle = 0;
+    int rentedVehicle = 0;
+    for (Vehicle vehicle : vehicles)
+    {
+        totalVehicle += 1;
+        if (vehicle.getAvailability())
+        {
+            availableVehicle += 1;
+        }
+        else
+        {
+            rentedVehicle += 1;
+        }
+    }
+    cout << "Total Vehicle : " << totalVehicle << endl;
+    cout << "Available Vehicle : " << availableVehicle << endl;
+    cout << "Rented Vehicle : " << rentedVehicle << endl;
+    cout << endl;
+
+    int totalCustomer = 0;
+    for (Customer customer : customers)
+    {
+        totalCustomer += 1;
+    }
+    cout << "Total Customer : " << totalCustomer << endl;
+
+    int totalRental = 0;
+    int activeRental = 0;
+    int completedRental = 0;
+    int totalRevenue = 0;
+    int lateFee = 0;
+    for (Rental rental : rentals)
+    {
+        totalRental += 1;
+        totalRevenue += rental.getTotalAmount();
+        if (rental.getStatus())
+        {
+            activeRental += 1;
+        }
+        else
+        {
+            completedRental += 1;
+            totalRevenue += rental.getLateCharge();
+            lateFee += rental.getLateCharge();
+        }
+    }
+
+    cout << "Total Rentals : " << totalRental << endl;
+    cout << "Active Rentals : " << activeRental << endl;
+    cout << "Completed Rentals : " << completedRental << endl;
+    cout << endl;
+    cout << "Total Revenue : " << totalRevenue << endl;
+    cout << "Late Fee Collected : " << lateFee << endl;
+
+    cout << "==============================================\n";
+}
+
+void searchVehicleByBrand(vector<Vehicle> &vehicles)
+{
+    cout << "\n========== SEARCH VEHICLE BY BRAND ==========\n";
+    string brand;
+    cout << "Enter Brand : ";
+    cin >> brand;
+    bool found = false;
+    for (Vehicle &vehicle : vehicles)
+    {
+        if (vehicle.getBrand() == brand)
+        {
+            vehicle.displayDetail();
+            found = true;
+        }
+    }
+
+    if (!found)
+    {
+        cout << "Vehicle with brand " << brand << " not found !\n";
+    }
+
+    cout << "==============================================\n";
+}
+
+void searchVehicleByModel(vector<Vehicle> &vehicles)
+{
+    cout << "\n========== SEARCH VEHICLE BY MODEL ==========\n";
+    string model;
+    cout << "Enter Brand : ";
+    cin >> model;
+    bool found = false;
+    for (Vehicle &vehicle : vehicles)
+    {
+        if (vehicle.getModel() == model)
+        {
+            vehicle.displayDetail();
+            found = true;
+        }
+    }
+
+    if (!found)
+    {
+        cout << "Vehicle with model " << model << " not found !\n";
+    }
+
+    cout << "==============================================\n";
+}
+
+void searchCustomerByName(vector<Customer> customers)
+{
+    cout << "\n========== SEARCH CUSTOMER BY NAME ==========\n";
+    string name;
+    cout << "Enter Customer Name : ";
+    cin >> name;
+    bool found = false;
+    for (Customer &customer : customers)
+    {
+        if (customer.getName() == name)
+        {
+            customer.displayDetail();
+            found = true;
+        }
+    }
+
+    if (!found)
+    {
+        cout << "Customer with Name " << name << " not found !\n";
+    }
+
+    cout << "==============================================\n";
+}
+
+void rentalDueToday(vector<Rental> rentals)
+{
+    cout << "\n========== TODAY RENTAL DUE ==========\n";
+    Date currentDate = Date::getCurrentDate();
+    for (Rental rental : rentals)
+    {
+        if (rental.getExpectedReturnDate().getDate() == Date::getCurrentDate().getDate() && rental.getExpectedReturnDate().getMonth() == Date::getCurrentDate().getMonth() && rental.getExpectedReturnDate().getYear() == Date::getCurrentDate().getYear())
+        {
+            cout << "---------------------------------------------\n";
+            cout << "Rental ID : " << rental.getRentalID() << endl;
+            cout << "Coustomer ID : " << rental.getCustomerID() << endl;
+            cout << "Vehicle ID : " << rental.getVehicleID() << endl;
+            cout << "---------------------------------------------\n";
+        }
+    }
+}
+
+void overDueRental(vector<Rental> rentals){
+    cout << "\n========== OVER DUE RENTAL ==========\n";
+    int f = 1;
+    for(Rental rental : rentals){
+        int c = Date::getDifference(Date::getCurrentDate(),rental.getExpectedReturnDate());
+        if(c > 0){
+            cout << "------------------------------------------------------\n";
+            cout << "Rental ID : " << rental.getRentalID() << endl;
+            cout << "Customer ID : " << rental.getCustomerID() << endl;
+            cout << "Expected Return : ";
+            rental.getExpectedReturnDate().displayDate();
+            cout << "\n";
+            cout << "Today's Date : ";
+            Date::getCurrentDate().displayDate();
+            cout << "\n";
+            cout << "Late Days : " << c;
+            cout << "------------------------------------------------------\n";
+            f = 0;
+        }
+    }
+    if(f == 1){
+        cout << "No OverDue Found!!";
+        cout << "===========================================================\n";
+    }
+
+
+}
+
 int main()
 {
     vector<Vehicle> vehicles;
@@ -1333,10 +1517,12 @@ int main()
         cout << "3. Search Vehicle\n";
         cout << "4. Update Vehicle\n";
         cout << "5. Display Available Vehicles\n";
+
         cout << "6. Return Vehicle\n";
         cout << "7. Register Customer\n";
         cout << "8. Display All Customer\n";
         cout << "9. Search Customer\n";
+
         cout << "10. Rent Vehicle\n";
         cout << "11. Display All Rental\n";
         cout << "12. Search Rental\n";
@@ -1344,7 +1530,22 @@ int main()
         cout << "14. Display Completed Rentals\n";
         cout << "15. Customer Rental History\n";
         cout << "16. Vehicle Rental History\n";
-        cout << "17. Exit\n";
+
+        cout << "17. Dashboard\n";
+
+        cout << "18. Display Rentals Due Today\n";
+        cout << "19. Display Overdue Rentals\n";
+
+        cout << "20. Search Vehicle by Brand\n";
+        cout << "21. Search Vehicle by Model\n";
+        cout << "22. Search Customer by Name\n";
+
+        cout << "23. Highest Revenue Vehicle\n";
+        cout << "24. Most Active Customer\n";
+
+        cout << "25. Save Data\n";
+        cout << "26. Exit\n";
+
         cout << "======================================\n";
         cout << "Enter your choice: ";
         int choice;
@@ -1414,6 +1615,19 @@ int main()
             vehicleRentalHistory(rentals, vehicles);
         }
         else if (choice == 17)
+        {
+            dashboard(vehicles, rentals, customers);
+        }
+        else if (choice == 18)
+        {
+            rentalDueToday(rentals);
+        }
+        else if (choice == 19)
+        {
+            rentalDueToday(rentals);
+        }
+
+        else if (choice == 26)
         {
             cout << "\nExiting Vehicle Rental System...\n";
             f = false;

@@ -3,3 +3,4 @@ V102|Hyundai|I10|1000|1
 V103|Toyota|Hilux|2200|1
 V104|Maruti|Alto|1000|1
 V105|Renault|Duster|1600|1
+V106|Kia|Carens|1700|1
