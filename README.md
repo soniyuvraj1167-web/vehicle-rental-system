@@ -1,6 +1,3 @@
-Yes — for GitHub, a **shorter README is better** for this project. Use this:
-
-````markdown
 # 🚗 Vehicle Rental Management System
 
 A console-based **Vehicle Rental Management System** developed in **C++** using OOP, STL, file handling, and date/time functionality.
