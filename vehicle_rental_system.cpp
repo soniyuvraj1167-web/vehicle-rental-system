@@ -4,6 +4,7 @@
 #include <fstream>
 #include <ctime>
 #include <iomanip>
+#include <unordered_map>
 using namespace std;
 
 class Date
@@ -956,7 +957,6 @@ void registerCustomer(vector<Customer> &customers)
             return;
         }
     }
-    
 
     cin.ignore(1000, '\n');
     string name;
@@ -1459,23 +1459,28 @@ void rentalDueToday(vector<Rental> rentals)
     Date currentDate = Date::getCurrentDate();
     for (Rental rental : rentals)
     {
-        if (rental.getExpectedReturnDate().getDate() == Date::getCurrentDate().getDate() && rental.getExpectedReturnDate().getMonth() == Date::getCurrentDate().getMonth() && rental.getExpectedReturnDate().getYear() == Date::getCurrentDate().getYear())
+        if (rental.getStatus() && rental.getExpectedReturnDate().getDate() == Date::getCurrentDate().getDate() && rental.getExpectedReturnDate().getMonth() == Date::getCurrentDate().getMonth() && rental.getExpectedReturnDate().getYear() == Date::getCurrentDate().getYear())
         {
             cout << "---------------------------------------------\n";
             cout << "Rental ID : " << rental.getRentalID() << endl;
             cout << "Coustomer ID : " << rental.getCustomerID() << endl;
             cout << "Vehicle ID : " << rental.getVehicleID() << endl;
+            cout << "Expected Return    : ";
+            rental.getExpectedReturnDate().displayDate();
             cout << "---------------------------------------------\n";
         }
     }
 }
 
-void overDueRental(vector<Rental> rentals){
+void overDueRental(vector<Rental> rentals)
+{
     cout << "\n========== OVER DUE RENTAL ==========\n";
     int f = 1;
-    for(Rental rental : rentals){
-        int c = Date::getDifference(Date::getCurrentDate(),rental.getExpectedReturnDate());
-        if(c > 0){
+    for (Rental rental : rentals)
+    {
+        int c = Date::getDifference(Date::getCurrentDate(), rental.getExpectedReturnDate());
+        if (c > 0)
+        {
             cout << "------------------------------------------------------\n";
             cout << "Rental ID : " << rental.getRentalID() << endl;
             cout << "Customer ID : " << rental.getCustomerID() << endl;
@@ -1490,12 +1495,98 @@ void overDueRental(vector<Rental> rentals){
             f = 0;
         }
     }
-    if(f == 1){
+    if (f == 1)
+    {
         cout << "No OverDue Found!!";
         cout << "===========================================================\n";
     }
+}
 
+void highestRevenueVehicle(vector<Rental> &rentals)
+{
+    cout << "\n========== HIGHEST REVENUE VEHICLE ==========\n";
 
+    if (rentals.empty())
+    {
+        cout << "No rental records found.\n";
+        cout << "==============================================\n";
+        return;
+    }
+
+    unordered_map<string, int> revenue;
+
+    for (Rental &rental : rentals)
+    {
+        revenue[rental.getVehicleID()] +=
+            rental.getTotalAmount() + rental.getLateCharge();
+    }
+
+    string highestVehicle = "";
+    int highestRevenue = 0;
+
+    for (auto &entry : revenue)
+    {
+        if (entry.second > highestRevenue)
+        {
+            highestRevenue = entry.second;
+            highestVehicle = entry.first;
+        }
+    }
+
+    cout << "Vehicle ID    : " << highestVehicle << endl;
+    cout << "Total Revenue : Rs. " << highestRevenue << endl;
+
+    cout << "==============================================\n";
+}
+
+void mostActiveCustomer(vector<Rental> &rentals)
+{
+    cout << "\n========== Most Active Customer ==========\n";
+
+    if (rentals.empty())
+    {
+        cout << "No rental records found.\n";
+        cout << "==============================================\n";
+        return;
+    }
+
+    unordered_map<string, int> detail;
+
+    for (Rental &rental : rentals)
+    {
+        detail[rental.getCustomerID()] += 1;
+    }
+
+    string activeCustomer = "";
+    int count = 0;
+
+    for (const auto &entry : detail)
+    {
+        if (entry.second > count)
+        {
+            count = entry.second;
+            activeCustomer = entry.first;
+        }
+    }
+
+    cout << "Customer ID : " << activeCustomer << endl;
+    cout << "Total Rental : " << count << endl;
+
+    cout << "==============================================\n";
+}
+
+void saveData(vector<Vehicle> &vehicles,
+              vector<Customer> &customers,
+              vector<Rental> &rentals)
+{
+    cout << "\n================ SAVE DATA ================\n";
+
+    saveVehicles(vehicles);
+    saveCustomer(customers);
+    saveRental(rentals);
+
+    cout << "All data saved successfully!\n";
+    cout << "============================================\n";
 }
 
 int main()
@@ -1624,7 +1715,31 @@ int main()
         }
         else if (choice == 19)
         {
-            rentalDueToday(rentals);
+            overDueRental(rentals);
+        }
+        else if (choice == 20)
+        {
+            searchVehicleByBrand(vehicles);
+        }
+        else if (choice == 21)
+        {
+            searchVehicleByModel(vehicles);
+        }
+        else if (choice == 22)
+        {
+            searchCustomerByName(customers);
+        }
+        else if (choice == 23)
+        {
+            highestRevenueVehicle(rentals);
+        }
+        else if (choice == 24)
+        {
+            mostActiveCustomer(rentals);
+        }
+        else if (choice == 25)
+        {
+            saveData(vehicles,customers,rentals);
         }
 
         else if (choice == 26)
